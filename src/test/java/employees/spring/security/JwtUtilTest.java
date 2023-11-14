@@ -33,14 +33,12 @@ class JwtUtilTest {
 
 	@Test
 	@Order(2)
-//	@Disabled
 	void extractUserNameTest() {
 		assertEquals(USER_NAME, jwtUtil.extractUserName(jwt));
 	}
 
 	@Test
 	@Order(3)
-//	@Disabled
 	void extractUserRolesTest() {
 		assertIterableEquals(Arrays.asList(expectedRoles), jwtUtil.extractRoles(jwt));
 	}

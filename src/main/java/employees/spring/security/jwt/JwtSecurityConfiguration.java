@@ -26,7 +26,7 @@ public class JwtSecurityConfiguration {
 		.exceptionHandling(custom -> custom
 				.accessDeniedHandler(securityExceptionsHandler)
 				.authenticationEntryPoint(securityExceptionsHandler))		
-		.authorizeHttpRequests(custom -> custom.requestMatchers("accounts/login").permitAll());
+		.authorizeHttpRequests(custom -> custom.requestMatchers("/accounts/login").permitAll());
 		rolesConfiguration.configure(http);
 		return http.httpBasic(Customizer.withDefaults())
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).build();

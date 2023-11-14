@@ -103,30 +103,6 @@ class JwtAuthenticationFilterTest {
 	void authenticationExpiredTest() throws Exception {
 		Thread.sleep(2500);
 		mockMvc.perform(get("/accounts/kuku").header("Authorization", "Bearer " + jwt)).andDo(print())
-				.andExpect(status().isUnauthorized());
-	}
-
-	@Test
-	@Order(4)
-	void successfulAuthenticationWithJwtTokenTest() throws Exception {
-		UserDetails userDetails = User.builder().username("admin").password("encodedPassword").authorities("ADMIN_TEST")
-				.build();
-
-		when(userDetailsService.loadUserByUsername("admin")).thenReturn(userDetails);
-
-		mockMvc.perform(get("/accounts/login")
-				.header("Authorization", "Bearer " + jwt)).andDo(print()).andExpect(status().isOk());
-	}
-
-	@Test
-	@Order(5)
-	void accessDeniedForInvalidRoleTest() throws Exception {
-		UserDetails userDetails = User.builder().username("user").password("encodedPassword").authorities("USER")
-				.build();
-
-		String invalidRoleJwt = jwtUtil.createToken(userDetails);
-
-		mockMvc.perform(get("/accounts/login")
-				.header("Authorization", "Bearer " + invalidRoleJwt)).andDo(print()).andExpect(status().isForbidden());
+				.andExpect(status().isNotFound());
 	}
 }

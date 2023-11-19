@@ -1,16 +1,19 @@
 package employees.spring.security.jwt;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import employees.spring.security.dto.Account;
+import employees.spring.service.AccountService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +28,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	private static final String BEARER = "Bearer ";
 	final JwtUtil jwtUtil;
-	final UserDetailsService userDetailsService;
+	final AccountService accountService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -35,13 +38,16 @@ public class JwtFilter extends OncePerRequestFilter {
 		if (jwt != null) {
 			try {
 				String userName = jwtUtil.extractUserName(jwt);
-				UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+				Account account = accountService.getAccount(userName);
 				log.trace("extracted username is {}", userName);
-				if (userDetails == null || !userDetails.isAccountNonExpired()) {
+				if (account == null) {
 					throw new UsernameNotFoundException(userName);
 				}
 				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-						userDetails, null, userDetails.getAuthorities());
+						account, null, 
+						Arrays.stream(account.getRoles())
+				          .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+				          .collect(Collectors.toList()));
 				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 				log.trace("security context is established");

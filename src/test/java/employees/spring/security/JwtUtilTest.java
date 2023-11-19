@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.User;
 
+import employees.spring.security.dto.Account;
 import employees.spring.security.jwt.JwtUtil;
 
 @SpringBootTest(classes = { JwtUtil.class })
@@ -24,10 +24,11 @@ class JwtUtilTest {
 	static final String USER_NAME = "user";
 	static String[] expectedRoles = { "ADMIN" };
 
+	
 	@Test
 	@Order(1)
 	void creationJwt() {
-		jwt = jwtUtil.createToken(User.withUsername(USER_NAME).password("xxxx").roles("ADMIN").build());
+		jwt = jwtUtil.createToken(new Account(USER_NAME, "xxxx",  expectedRoles ) );
 
 	}
 

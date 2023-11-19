@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import employees.spring.security.dto.Account;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -29,8 +29,8 @@ public class JwtUtil {
 		return extractClaim(token, Claims::getSubject);
 	}
 	
-	public String createToken(UserDetails userDetails) {
-		return createToken(new HashMap<>(), userDetails);
+	public String createToken(Account account) {
+		return createToken(new HashMap<>(), account);
 	}
 	
 	public Date extractExpirationDate(String token) {
@@ -54,10 +54,8 @@ public class JwtUtil {
 		return claimResolver.apply(extractAllClaims(token));
 	}
 	
-	public String createToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-		String[]roles=userDetails.getAuthorities().stream()
-				.map(auth->auth.getAuthority().replace("ROLE_", ""))
-				.toArray(String[]::new);
+	public String createToken(Map<String, Object> extraClaims, Account account) {
+		String[]roles=account.getRoles();
 		extraClaims.put("roles", roles);
 		Date currentDate = new Date();
 		Date expDate = new Date(System.currentTimeMillis() + expPeriod);
@@ -65,7 +63,7 @@ public class JwtUtil {
 					.addClaims(extraClaims)
 					.setExpiration(expDate)
 					.setIssuedAt(currentDate)
-					.setSubject(userDetails.getUsername())
+					.setSubject(account.getUsername())
 					.signWith(getSigningKey(), SignatureAlgorithm.HS256)
 					.compact();
 	}
